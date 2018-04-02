@@ -10,7 +10,7 @@ store_all=rbind(store_train,store_test)
 library(dplyr)
 glimpse(store_all)
 
-##if you look at variables storecode n statealpha, you will notice that it has more than 2000 unique
+##if you look at variables storecode n statealpha, you will notice that it has lot more unique
 #values,having none of the individual values having frequency higher than a good number , we'll drop those
 #vars.
 store_all=store_all %>% select(-storecode-state_alpha)
@@ -103,7 +103,7 @@ for_vif=lm(store~.-Id-Areaname_AroostookCountyME-storecode_NCNTY23003N23003
            -Areaname_Boston_Cambridge_QuincyMA_NHHUDMetroFMRArea-sales0-sales2-sales3-sales1-State,data=store_train)
 sort(vif(for_vif),decreasing = T)[1:3]
 
-##lets build our model now that all VIFs are below 5
+##lets build our model now that all VIFs are below 5 with removing high p-values
 rm(for_vif)
 fit=lm(store~.-Id-Areaname_AroostookCountyME-storecode_NCNTY23003N23003
        -`Areaname_PenobscotCountyME(part)HUDMetroFMRArea`
@@ -435,29 +435,51 @@ summary(fit)
 test.probs=predict(fit,newdata=store_test,type='response')
 write.csv(test.probs,'Omkar_Sawant_P2_part2.csv',row.names = F)
 
-##1st in quiz----------------------------------------------------------------------------------
+##------------------------------------Quiz----------------------------------------------------------------------------------
+#(1) - what is the total sales (sum of all sales) of Supermarket Type1 in area Kennebec County, ME? 
 glimpse(store_train)
-
 store_train %>%
   filter(Areaname =="Kennebec County") %>%
   filter(store_Type =="Supermarket Type1") %>%
   summarise(Sales = sum(sales0,sales1,sales2,sales3,sales4))
 
-#4th in quiz
+#Ans - 38680
+
+#(2) - Should storecode be included in building models?
+#Ans - No
+
+#(3) -  should country be treated as numeric type or character?
+#Ans - character
+
+#(4) - Find out number of unique categories of variable Areaname
 unique(store_train$Areaname)
 
-##5th quiz
+#Ans - 1891
+
+#(5) - For store type grocery store what is the response rate ? 
+#[ what % of obs have response value as 1 ]  Round off to two decimal digits. 
+
 store_train %>%
   filter(store_Type =="Grocery Store") %>%
   filter(store ==0)
+
+#Ans - 42.13
   
-#6th\
+#(6) - Do all the sales variable follow normal distribution?
 library(ggplot2)
 ggplot(store_train,aes(x=sales0,y))+geom_histogram()
 
-#7th
+#Ans - No
 
+#(7) - Number of outliers for total sales based on following limits (q1-1.5*IQR, q3+1.5*IQR)?
+#Ans - NA
 
-#9th
+#(8) - which store type has maximum variance in total sales?
+#Ans - Grocery Store
+
+#(9) - How many dummies will you create for variable state_alpha?
 unique(store_train$state_alpha)
-#54 unique so n-1 variables u will create
+#Ans - 54  as unique so n-1 variables  will be created by you
+
+#(10) - What should be the type of categorical variable when using the function randomForest?
+#Ans - NA (maybe nominal/ ordinal)
